@@ -6,10 +6,7 @@ RUN curl -sL https://github.com/mayswind/AriaNg/releases/download/1.3.3/AriaNg-1
     unzip -q /tmp/ariang.zip -d /usr/local/apache2/htdocs/ && \
     rm /tmp/ariang.zip
 
-RUN echo '
-ServerName localhost
-Listen 8080
-' >> /usr/local/apache2/conf/httpd.conf
+RUN printf 'ServerName localhost\nListen 8080\n' >> /usr/local/apache2/conf/httpd.conf
 
 ENV ARIA2_HOST=localhost
 ENV ARIA2_PORT=6800
