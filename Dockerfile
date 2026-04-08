@@ -1,6 +1,7 @@
 FROM debian:bookworm-slim AS builder
 
 RUN apt-get update && apt-get install -y \
+    build-essential \
     autoconf \
     automake \
     autopoint \
@@ -52,7 +53,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /aria2-bin/ /usr/local/
 
 ENV PATH="/usr/local:${PATH}"
-ENV LD_LIBRARY_PATH="/usr/local:${LD_LIBRARY_PATH}"
 
 RUN aria2c --version
 
