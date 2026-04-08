@@ -45,8 +45,8 @@ jobs:
           platforms: ${{ matrix.platform }}
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-${{ matrix.platform }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.platform }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-$(echo ${{ matrix.platform }} | sed 's/\//-/g')
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$(echo ${{ matrix.platform }} | sed 's/\//-/g')
           cache-from: type=gha,scope=${{ matrix.platform }}
           cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
 
