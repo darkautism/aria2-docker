@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  aria2:
+    image: ghcr.io/<your-username>/aria2-docker:latest
+    container_name: aria2
+    volumes:
+      - ./config:/config
+      - ./downloads:/downloads
+    environment:
+      - RPC_SECRET=your-secret-token
+    ports:
+      - "6800:6800"
+      - "6881-6999:6881-6999"
+    restart: unless-stopped
+
+  ariang:
+    image: ghcr.io/<your-username>/aria2-docker-ariang:latest
+    container_name: ariang
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
