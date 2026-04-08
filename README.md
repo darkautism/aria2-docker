@@ -22,8 +22,9 @@ docker pull ghcr.io/<your-username>/aria2-docker:arm64
 
 | Path | Description |
 |------|-------------|
-| `/config` | Configuration files and session storage |
+| `/config` | Configuration files and session storage (auto-populated with default config on first run) |
 | `/downloads` | Download destination directory |
+| `/etc/aria2` | Default config directory (read-only, contains fallback config) |
 
 ## Usage
 
