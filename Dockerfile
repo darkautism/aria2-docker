@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     libxml2-dev \
     libsqlite3-dev \
+    libuv1-dev \
     libcppunit-dev \
     zlib1g-dev \
     libzstd-dev \
@@ -40,10 +41,9 @@ RUN cd aria2-* && \
         --with-openssl \
         --with-libxml2 \
         --with-sqlite3 \
-        --enablebittorrent \
-        --enablemetalink \
-        --enable-xml-rpc \
         --with-libuv \
+        --enable-bittorrent \
+        --enable-metalink \
         --disable-debug \
     && make -j$(nproc) \
     && make install \
