@@ -1,5 +1,7 @@
 FROM debian:bookworm-slim AS builder
 
+ARG ARIA2_VERSION=release-1.37.0
+
 RUN apt-get update && apt-get install -y \
     build-essential \
     autoconf \
@@ -16,23 +18,32 @@ RUN apt-get update && apt-get install -y \
     libzstd-dev \
     ca-certificates \
     curl \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /aria2-build
 
-RUN curl -L -o aria2.tar.gz "https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0.tar.gz" \
-    && tar xzf aria2.tar.gz \
-    && rm aria2.tar.gz
+RUN if [ "$ARIA2_VERSION" = "master" ]; then \
+        git clone --depth 1 https://github.com/aria2/aria2.git aria2-src; \
+        cd aria2-src; \
+    else \
+        curl -L -o aria2.tar.gz "https://github.com/aria2/aria2/releases/download/${ARIA2_VERSION}/aria2-${ARIA2_VERSION#release-}.tar.gz"; \
+        tar xzf aria2.tar.gz; \
+        rm aria2.tar.gz; \
+        cd aria2-*; \
+    fi
 
-RUN cd aria2-1.37.0 && \
+RUN cd aria2-* && \
     ./configure \
         --prefix=/usr/local \
         --enable-shared \
         --with-openssl \
         --with-libxml2 \
-        --without-libuv \
-        --without-appletls \
-        --without-gnutls \
+        --with-sqlite3 \
+        --enablebittorrent \
+        --enablemetalink \
+        --enable-xml-rpc \
+        --with-libuv \
         --disable-debug \
     && make -j$(nproc) \
     && make install \
@@ -48,6 +59,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl3 \
     libxml2 \
     libsqlite3-0 \
+    libuv1 \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
@@ -55,7 +67,7 @@ COPY --from=builder /aria2-bin/ /usr/local/
 
 ENV PATH="/usr/local:${PATH}"
 
-RUN aria2c --version
+RUN mkdir -p /config /downloads && \
+    aria2c --version
 
 ENTRYPOINT ["aria2c"]
-CMD ["--help"]

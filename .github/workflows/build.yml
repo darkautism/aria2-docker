@@ -8,6 +8,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  ARIA2_VERSION: release-1.37.0
 
 jobs:
   build:
@@ -46,6 +47,8 @@ jobs:
         with:
           context: .
           file: Dockerfile
+          build-args: |
+            ARIA2_VERSION=${{ env.ARIA2_VERSION }}
           platforms: ${{ matrix.platform }}
           push: true
           tags: |
