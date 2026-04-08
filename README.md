@@ -18,17 +18,20 @@ docker pull ghcr.io/<your-username>/aria2-docker:amd64
 docker pull ghcr.io/<your-username>/aria2-docker:arm64
 ```
 
+## Required Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `RPC_SECRET` | **Required** - RPC secret token for authentication |
+
 ## Mount Points
 
 | Path | Description |
 |------|-------------|
 | `/config` | Configuration files and session storage (auto-populated with default config on first run) |
 | `/downloads` | Download destination directory |
-| `/etc/aria2` | Default config directory (read-only, contains fallback config) |
 
 ## Usage
-
-The container comes with a default configuration file at `/config/aria2.conf`.
 
 ### Run as RPC Service (with WebUI)
 
@@ -39,6 +42,7 @@ docker run -d \
   -v $(pwd)/downloads:/downloads \
   -p 6800:6800 \
   -p 6881-6999:6881-6999 \
+  -e RPC_SECRET=your-secret-token \
   ghcr.io/<your-username>/aria2-docker
 ```
 
@@ -48,21 +52,6 @@ The default configuration enables:
 - Downloads to `/downloads`
 - Session saving to `/config/aria2.session`
 
-### With Custom Configuration
-
-Override the default config:
-
-```bash
-docker run -d \
-  --name aria2 \
-  -v $(pwd)/config:/config \
-  -v $(pwd)/downloads:/downloads \
-  -p 6800:6800 \
-  -p 6881-6999:6881-6999 \
-  ghcr.io/<your-username>/aria2-docker \
-  aria2c --conf-path=/config/my-aria2.conf
-```
-
 ### Override with CLI Arguments
 
 ```bash
@@ -71,8 +60,10 @@ docker run -d \
   -v $(pwd)/config:/config \
   -v $(pwd)/downloads:/downloads \
   -p 6800:6800 \
+  -p 6881-6999:6881-6999 \
+  -e RPC_SECRET=your-secret-token \
   ghcr.io/<your-username>/aria2-docker \
-  aria2c --conf-path=/config/aria2.conf --rpc-secret=mypassword --max-connection-per-server=8
+  aria2c --conf-path=/config/aria2.conf --max-connection-per-server=8
 ```
 
 ### Basic One-time Download
@@ -82,52 +73,23 @@ docker run --rm -v $(pwd)/downloads:/downloads ghcr.io/<your-username>/aria2-doc
   aria2c -d /downloads -o file.iso "https://example.com/file.iso"
 ```
 
-### Run as RPC Service (with WebUI)
-
-```bash
-docker run -d \
-  --name aria2 \
-  -v $(pwd)/config:/config \
-  -v $(pwd)/downloads:/downloads \
-  -p 6800:6800 \
-  -p 6881-6889:6881-6889 \
-  ghcr.io/<your-username>/aria2-docker
-```
-
-### With Custom Configuration
-
-```bash
-docker run -d \
-  --name aria2 \
-  -v $(pwd)/config:/config \
-  -v $(pwd)/downloads:/downloads \
-  -p 6800:6800 \
-  -p 6881-6889:6881-6889 \
-  ghcr.io/<your-username>/aria2-docker \
-  aria2c \
-    --conf-path=/config/aria2.conf \
-    --enable-rpc \
-    --rpc-listen-all=true \
-    --rpc-secret=<your-secret>
-```
-
 ## Common Parameters
 
 ### RPC Configuration
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `--enable-rpc` | Enable RPC interface | disabled |
-| `--rpc-listen-all=false` | Listen on all interfaces | false |
+| `--enable-rpc` | Enable RPC interface | enabled |
+| `--rpc-listen-all=true` | Listen on all interfaces | true |
 | `--rpc-listen-port=6800` | RPC listen port | 6800 |
-| `--rpc-secret=<secret>` | RPC secret token (recommended) | none |
+| `--rpc-secret=<secret>` | RPC secret token | required |
 | `--rpc-allow-origin-all=true` | Allow all origins | true |
 
 ### Download Directory
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `--dir=/downloads` | Download directory | current dir |
+| `--dir=/downloads` | Download directory | /downloads |
 
 ### Connection Settings
 
@@ -135,7 +97,7 @@ docker run -d \
 |-----------|-------------|---------|
 | `-x, --max-connection-per-server=16` | Max connections per server | 1 |
 | `-s, --split=16` | Number of connections per file | 5 |
-| `-k, --min-split-size=10M` | Minimum split size | 20M |
+| `-k, --min-split-size=20M` | Minimum split size | 20M |
 | `-j, --max-concurrent-downloads=5` | Max concurrent downloads | 5 |
 
 ### BitTorrent Settings
@@ -154,7 +116,6 @@ docker run -d \
 |-----------|-------------|---------|
 | `--save-session=/config/aria2.session` | Save session file | none |
 | `--save-session-interval=60` | Save session interval (sec) | 60 |
-| `--input-file=/config/aria2.conf` | Input configuration file | none |
 | `--log=/config/aria2.log` | Log file | none |
 
 ### Advanced
@@ -163,41 +124,35 @@ docker run -d \
 |-----------|-------------|---------|
 | `--disable-ipv6=false` | Enable IPv6 | false |
 | `--check-integrity=true` | Verify checksums | false |
-| `--continue=true` | Continue partial downloads | false |
+| `--continue=true` | Continue partial downloads | true |
 | `--max-tries=5` | Retry attempts | 5 |
 | `--retry-wait=0` | Wait between retries (sec) | 0 |
 
-## Example: Complete Configuration
+## Example: Custom Configuration
 
 Create `config/aria2.conf`:
 
 ```conf
-# Basic Settings
 dir=/downloads
 log=/config/aria2.log
 save-session=/config/aria2.session
 save-session-interval=60
+log-level=notice
 
-# RPC Settings (required for WebUI)
 enable-rpc=true
 rpc-listen-all=true
 rpc-listen-port=6800
-rpc-secret=your-secret-here
 
-# Connection Settings
 max-connection-per-server=16
 split=16
-min-split-size=10M
+min-split-size=20M
 
-# BitTorrent Settings
 listen-port=6881-6999
 enable-dht=true
 enable-dht6=true
 enable-peer-exchange=true
 seed-ratio=1.0
 
-# Other
-check-integrity=true
 continue=true
 ```
 
@@ -210,20 +165,9 @@ docker run -d \
   -v $(pwd)/downloads:/downloads \
   -p 6800:6800 \
   -p 6881-6999:6881-6999 \
+  -e RPC_SECRET=your-secret-token \
   ghcr.io/<your-username>/aria2-docker \
   aria2c --conf-path=/config/aria2.conf
-```
-
-Or run with just CLI overrides (keeps default config + overrides):
-
-```bash
-docker run -d \
-  --name aria2 \
-  -v $(pwd)/config:/config \
-  -v $(pwd)/downloads:/downloads \
-  -p 6800:6800 \
-  ghcr.io/<your-username>/aria2-docker \
-  aria2c --conf-path=/config/aria2.conf --rpc-secret=mypassword
 ```
 
 ## Build Manually
