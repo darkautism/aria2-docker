@@ -1,5 +1,7 @@
 FROM httpd:2.4
 
+RUN apt-get update && apt-get install -y curl unzip sed && rm -rf /var/lib/apt/lists/*
+
 RUN rm -rf /usr/local/apache2/htdocs/*
 
 RUN curl -sL https://github.com/mayswind/AriaNg/releases/download/1.3.3/AriaNg-1.3.3.zip -o /tmp/ariang.zip && \
