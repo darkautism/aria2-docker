@@ -27,7 +27,54 @@ docker pull ghcr.io/<your-username>/aria2-docker:arm64
 
 ## Usage
 
-### Basic Download
+The container comes with a default configuration file at `/config/aria2.conf`.
+
+### Run as RPC Service (with WebUI)
+
+```bash
+docker run -d \
+  --name aria2 \
+  -v $(pwd)/config:/config \
+  -v $(pwd)/downloads:/downloads \
+  -p 6800:6800 \
+  -p 6881-6999:6881-6999 \
+  ghcr.io/<your-username>/aria2-docker
+```
+
+The default configuration enables:
+- RPC on port 6800
+- BitTorrent on ports 6881-6999
+- Downloads to `/downloads`
+- Session saving to `/config/aria2.session`
+
+### With Custom Configuration
+
+Override the default config:
+
+```bash
+docker run -d \
+  --name aria2 \
+  -v $(pwd)/config:/config \
+  -v $(pwd)/downloads:/downloads \
+  -p 6800:6800 \
+  -p 6881-6999:6881-6999 \
+  ghcr.io/<your-username>/aria2-docker \
+  aria2c --conf-path=/config/my-aria2.conf
+```
+
+### Override with CLI Arguments
+
+```bash
+docker run -d \
+  --name aria2 \
+  -v $(pwd)/config:/config \
+  -v $(pwd)/downloads:/downloads \
+  -p 6800:6800 \
+  ghcr.io/<your-username>/aria2-docker \
+  aria2c --conf-path=/config/aria2.conf --rpc-secret=mypassword --max-connection-per-server=8
+```
+
+### Basic One-time Download
 
 ```bash
 docker run --rm -v $(pwd)/downloads:/downloads ghcr.io/<your-username>/aria2-docker \
@@ -130,7 +177,7 @@ log=/config/aria2.log
 save-session=/config/aria2.session
 save-session-interval=60
 
-# RPC Settings
+# RPC Settings (required for WebUI)
 enable-rpc=true
 rpc-listen-all=true
 rpc-listen-port=6800
@@ -153,7 +200,7 @@ check-integrity=true
 continue=true
 ```
 
-Run with:
+Run with custom config:
 
 ```bash
 docker run -d \
@@ -164,6 +211,18 @@ docker run -d \
   -p 6881-6999:6881-6999 \
   ghcr.io/<your-username>/aria2-docker \
   aria2c --conf-path=/config/aria2.conf
+```
+
+Or run with just CLI overrides (keeps default config + overrides):
+
+```bash
+docker run -d \
+  --name aria2 \
+  -v $(pwd)/config:/config \
+  -v $(pwd)/downloads:/downloads \
+  -p 6800:6800 \
+  ghcr.io/<your-username>/aria2-docker \
+  aria2c --conf-path=/config/aria2.conf --rpc-secret=mypassword
 ```
 
 ## Build Manually

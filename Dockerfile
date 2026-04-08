@@ -67,7 +67,10 @@ COPY --from=builder /aria2-bin/ /usr/local/
 
 ENV PATH="/usr/local:${PATH}"
 
-RUN mkdir -p /config /downloads && \
-    aria2c --version
+RUN mkdir -p /config /downloads
 
-ENTRYPOINT ["aria2c"]
+COPY aria2.conf /config/aria2.conf
+
+RUN aria2c --version
+
+ENTRYPOINT ["sh", "-c", "exec aria2c --conf-path=/config/aria2.conf \"$@\"", "--"]
