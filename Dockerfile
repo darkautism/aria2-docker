@@ -27,6 +27,7 @@ WORKDIR /aria2-build
 RUN if [ "$ARIA2_VERSION" = "master" ]; then \
         git clone --depth 1 https://github.com/aria2/aria2.git aria2-src; \
         cd aria2-src; \
+        autoreconf -i; \
     else \
         curl -L -o aria2.tar.gz "https://github.com/aria2/aria2/releases/download/${ARIA2_VERSION}/aria2-${ARIA2_VERSION#release-}.tar.gz"; \
         tar xzf aria2.tar.gz; \
