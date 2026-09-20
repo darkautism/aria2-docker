@@ -85,12 +85,6 @@ jobs:
 
       - name: Create manifest
         run: |
-          docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:nightly \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:nightly-linux-amd64 \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:nightly-linux-arm64
-          docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:nightly
+          docker buildx imagetools create             --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:nightly             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:nightly-linux-amd64             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:nightly-linux-arm64
 
-          docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:nightly-${{ env.DATE }} \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:nightly-${{ env.DATE }}-linux-amd64 \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:nightly-${{ env.DATE }}-linux-arm64
-          docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:nightly-${{ env.DATE }}
+          docker buildx imagetools create             --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:nightly-${{ env.DATE }}             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:nightly-${{ env.DATE }}-linux-amd64             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:nightly-${{ env.DATE }}-linux-arm64
